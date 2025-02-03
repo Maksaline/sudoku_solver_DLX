@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sudoku_solver/algorithm/dlx_solver.dart';
 import 'package:sudoku_solver/responsive/responsive_layout.dart';
 
 class Sudoku extends StatefulWidget {
@@ -19,13 +20,10 @@ class _SudokuState extends State<Sudoku> {
 
   Future<String> getScriptPath(String scriptName) async {
     try {
-      // Get the application support directory (works on both Android and Windows)
       final appDir = await getApplicationSupportDirectory();
       final file = File('${appDir.path}/$scriptName');
 
-      // Check if file already exists
       if (!await file.exists()) {
-        // Try to load from assets
         try {
           final scriptBytes = await rootBundle.load('assets/python/$scriptName');
           await file.create(recursive: true);
@@ -50,23 +48,68 @@ class _SudokuState extends State<Sudoku> {
 
   void solveSudoku() async {
     final scriptPath = await getScriptPath('test.py');
-    final interpreter = Platform.isAndroid ? 'python3' : 'python';
 
-    final inputJson = jsonEncode(grid);
-    final result = await Process.run(interpreter, [
-      scriptPath,  // Path to your Python script
-      inputJson
-    ]);
-   if(result.exitCode == 0) {
-      final output = jsonDecode(result.stdout as String);
+    if(Platform.isAndroid) {
+      final gridSolver = GridSolver(grid);
+      final solution = gridSolver.solve();
       for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
-          textControllers['$i$j']!.text = output[i][j].toString();
+          if(solution[i][j] == 0) {
+            invalidInput();
+            return;
+          }
+          textControllers['$i$j']!.text = solution[i][j].toString();
+          grid[i][j] = solution[i][j];
         }
       }
     } else {
-      print('Error: ${result.stderr}');
+      final inputJson = jsonEncode(grid);
+      final result = await Process.run('python', [
+        scriptPath,
+        inputJson
+      ]);
+      if(result.exitCode == 0) {
+        final output = jsonDecode(result.stdout as String);
+        for (int i = 0; i < 9; i++) {
+          for (int j = 0; j < 9; j++) {
+            if(output[i][j] == 0) {
+              invalidInput();
+              return;
+            }
+            textControllers['$i$j']!.text = output[i][j].toString();
+            grid[i][j] = output[i][j];
+          }
+        }
+      } else {
+        print('Error: ${result.stderr}');
+      }
     }
+  }
+
+  void invalidInput() {
+    for(int i = 0; i < 9; i++) {
+      for(int j = 0; j < 9; j++) {
+        textControllers['$i$j']!.clear();
+        grid[i][j] = 0;
+      }
+    }
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Invalid Input'),
+          content: const Text('Please enter a valid sudoku puzzle'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -93,7 +136,7 @@ class _SudokuState extends State<Sudoku> {
               height: (Responsive.isMobile(context)) ? MediaQuery.of(context).size.width * 0.95 : MediaQuery.of(context).size.height * 0.7,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.black),
+                border: Border.all(color: Colors.black, width: 2),
               ),
               child: Column(
                 children: [
@@ -110,8 +153,8 @@ class _SudokuState extends State<Sudoku> {
                           child: Container(
                             decoration: const BoxDecoration(
                               border: Border(
-                                right: BorderSide(color: Colors.black),
-                                left: BorderSide(color: Colors.black),
+                                right: BorderSide(color: Colors.black, width: 2),
+                                left: BorderSide(color: Colors.black, width: 2),
                               ),
                             ),
                             child: buildSmallestColumn(0, 3),
@@ -131,8 +174,8 @@ class _SudokuState extends State<Sudoku> {
                     child: Container(
                       decoration: const BoxDecoration(
                         border: Border(
-                          top: BorderSide(color: Colors.black),
-                          bottom: BorderSide(color: Colors.black),
+                          top: BorderSide(color: Colors.black, width: 2),
+                          bottom: BorderSide(color: Colors.black, width: 2),
                         ),
                       ),
                       child: Row(
@@ -148,8 +191,8 @@ class _SudokuState extends State<Sudoku> {
                             child: Container(
                               decoration: const BoxDecoration(
                                 border: Border(
-                                  right: BorderSide(color: Colors.black),
-                                  left: BorderSide(color: Colors.black),
+                                  right: BorderSide(color: Colors.black, width: 2),
+                                  left: BorderSide(color: Colors.black, width: 2),
                                 ),
                               ),
                               child: buildSmallestColumn(3, 3),
@@ -180,8 +223,8 @@ class _SudokuState extends State<Sudoku> {
                             child: Container(
                               decoration: const BoxDecoration(
                                 border: Border(
-                                  right: BorderSide(color: Colors.black),
-                                  left: BorderSide(color: Colors.black),
+                                  right: BorderSide(color: Colors.black, width: 2),
+                                  left: BorderSide(color: Colors.black, width: 2),
                                 ),
                               ),
                               child: buildSmallestColumn(6, 3),
@@ -205,12 +248,34 @@ class _SudokuState extends State<Sudoku> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    for (int i = 0; i < 9; i++) {
-                      for (int j = 0; j < 9; j++) {
-                        textControllers['$i$j']!.clear();
-                        grid[i][j] = 0;
-                      }
-                    }
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Reset ?'),
+                          content: const Text('Are you sure you want to reset the puzzle?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                for (int i = 0; i < 9; i++) {
+                                  for (int j = 0; j < 9; j++) {
+                                    textControllers['$i$j']!.clear();
+                                    grid[i][j] = 0;
+                                  }
+                                }
+                              },
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
@@ -276,8 +341,8 @@ class _SudokuState extends State<Sudoku> {
                               child: Container(
                                 decoration: const BoxDecoration(
                                   border: Border(
-                                    top: BorderSide(color: Colors.black45),
-                                    bottom: BorderSide(color: Colors.black45),
+                                    top: BorderSide(color: Colors.black26),
+                                    bottom: BorderSide(color: Colors.black26),
                                   )
                                 ),
                                 child: buildSmallestRow(xOffset + 1, yOffset),
@@ -305,8 +370,8 @@ class _SudokuState extends State<Sudoku> {
                                     child: Container(
                                       decoration: const BoxDecoration(
                                         border: Border(
-                                          right: BorderSide(color: Colors.black45),
-                                          left: BorderSide(color: Colors.black45),
+                                          right: BorderSide(color: Colors.black26),
+                                          left: BorderSide(color: Colors.black26),
                                         ),
                                       ),
                                       child: buildTextField(xOffset, yOffset + 1),
@@ -324,21 +389,24 @@ class _SudokuState extends State<Sudoku> {
 
   Center buildTextField(int i, int j) {
     return Center(
-                                    child: TextFormField(
-                                      controller: textControllers['$i$j'],
-                                      keyboardType: TextInputType.number,
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.allow(RegExp(r'[1-9]')),
-                                        LengthLimitingTextInputFormatter(1),
-                                      ],
-                                      textAlign: TextAlign.center,
-                                      decoration: const InputDecoration(
-                                        border: InputBorder.none,
+                                    child: Padding(
+                                      padding: (Responsive.isMobile(context)) ? const EdgeInsets.only(bottom: 5.0) : EdgeInsets.zero,
+                                      child: TextFormField(
+                                        controller: textControllers['$i$j'],
+                                        keyboardType: TextInputType.number,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.allow(RegExp(r'[1-9]')),
+                                          LengthLimitingTextInputFormatter(1),
+                                        ],
+                                        textAlign: TextAlign.center,
+                                        decoration: const InputDecoration(
+                                          border: InputBorder.none,
+                                        ),
+                                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                        onFieldSubmitted: (value) {
+                                          grid[i][j] = int.parse(value);
+                                        },
                                       ),
-                                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                                      onFieldSubmitted: (value) {
-                                        grid[i][j] = int.parse(value);
-                                      },
                                     ),
                                   );
   }
