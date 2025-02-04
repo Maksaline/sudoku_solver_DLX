@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sudoku_solver/algorithm/dlx_solver.dart';
 import 'package:sudoku_solver/responsive/responsive_layout.dart';
@@ -17,6 +18,7 @@ class Sudoku extends StatefulWidget {
 class _SudokuState extends State<Sudoku> {
   final Map<String, TextEditingController> textControllers = {};
   final List<List<int>> grid = List.generate(9, (_) => List.generate(9, (_) => 0));
+  bool isEnabled = true;
 
   Future<String> getScriptPath(String scriptName) async {
     try {
@@ -49,6 +51,10 @@ class _SudokuState extends State<Sudoku> {
   void solveSudoku() async {
     final scriptPath = await getScriptPath('test.py');
 
+    setState(() {
+      isEnabled = false;
+    });
+
     if(Platform.isAndroid) {
       final gridSolver = GridSolver(grid);
       final solution = gridSolver.solve();
@@ -78,6 +84,7 @@ class _SudokuState extends State<Sudoku> {
             }
             textControllers['$i$j']!.text = output[i][j].toString();
             grid[i][j] = output[i][j];
+
           }
         }
       } else {
@@ -87,6 +94,9 @@ class _SudokuState extends State<Sudoku> {
   }
 
   void invalidInput() {
+    setState(() {
+      isEnabled = true;
+    });
     for(int i = 0; i < 9; i++) {
       for(int j = 0; j < 9; j++) {
         textControllers['$i$j']!.clear();
@@ -252,14 +262,14 @@ class _SudokuState extends State<Sudoku> {
                       context: context,
                       builder: (context) {
                         return AlertDialog(
-                          title: const Text('Reset ?'),
-                          content: const Text('Are you sure you want to reset the puzzle?'),
+                          title: Text('Reset ?', style: GoogleFonts.lato()),
+                          content: Text('Are you sure you want to reset the puzzle?', style: GoogleFonts.lato()),
                           actions: [
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
-                              child: const Text('Cancel'),
+                              child: Text('Cancel', style: GoogleFonts.lato(color: Colors.black)),
                             ),
                             TextButton(
                               onPressed: () {
@@ -269,8 +279,12 @@ class _SudokuState extends State<Sudoku> {
                                     grid[i][j] = 0;
                                   }
                                 }
+                                setState(() {
+                                  isEnabled = true;
+                                });
+                                Navigator.of(context).pop();
                               },
-                              child: const Text('OK'),
+                              child: Text('OK', style: GoogleFonts.lato(color: Colors.red)),
                             ),
                           ],
                         );
@@ -287,12 +301,12 @@ class _SudokuState extends State<Sudoku> {
                         width: 2
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.restart_alt),
-                      SizedBox(width: 10),
-                      Text('Reset'),
+                      const Icon(Icons.restart_alt),
+                      const SizedBox(width: 10),
+                      Text('Reset', style: GoogleFonts.lato(),),
                     ],
                   ),
                 ),
@@ -312,12 +326,12 @@ class _SudokuState extends State<Sudoku> {
                     // minimumSize: const Size(200, 50),
                     maximumSize: const Size(150, 50),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.calculate),
-                      SizedBox(width: 10),
-                      Text('Solve'),
+                      const Icon(Icons.calculate),
+                      const SizedBox(width: 10),
+                      Text('Solve', style: GoogleFonts.lato(),),
                     ],
                   ),
                 ),
@@ -392,7 +406,9 @@ class _SudokuState extends State<Sudoku> {
                                     child: Padding(
                                       padding: (Responsive.isMobile(context)) ? const EdgeInsets.only(bottom: 5.0) : EdgeInsets.zero,
                                       child: TextFormField(
+                                        cursorHeight: 20,
                                         controller: textControllers['$i$j'],
+                                        enabled: isEnabled,
                                         keyboardType: TextInputType.number,
                                         inputFormatters: [
                                           FilteringTextInputFormatter.allow(RegExp(r'[1-9]')),
@@ -402,7 +418,14 @@ class _SudokuState extends State<Sudoku> {
                                         decoration: const InputDecoration(
                                           border: InputBorder.none,
                                         ),
-                                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                        style: isEnabled ? GoogleFonts.lato(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ) : GoogleFonts.lato(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
                                         onFieldSubmitted: (value) {
                                           grid[i][j] = int.parse(value);
                                         },
