@@ -18,7 +18,9 @@ class Sudoku extends StatefulWidget {
 class _SudokuState extends State<Sudoku> {
   final Map<String, TextEditingController> textControllers = {};
   final List<List<int>> grid = List.generate(9, (_) => List.generate(9, (_) => 0));
+  final Set<String> inputCells = {};
   bool isEnabled = true;
+  bool isSolved = false;
 
   Future<String> getScriptPath(String scriptName) async {
     try {
@@ -68,6 +70,9 @@ class _SudokuState extends State<Sudoku> {
           grid[i][j] = solution[i][j];
         }
       }
+      setState(() {
+        isSolved = true;
+      });
     } else {
       final inputJson = jsonEncode(grid);
       final result = await Process.run('python', [
@@ -84,9 +89,11 @@ class _SudokuState extends State<Sudoku> {
             }
             textControllers['$i$j']!.text = output[i][j].toString();
             grid[i][j] = output[i][j];
-
           }
         }
+        setState(() {
+          isSolved = true;
+        });
       } else {
         print('Error: ${result.stderr}');
       }
@@ -136,209 +143,229 @@ class _SudokuState extends State<Sudoku> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: (Responsive.isMobile(context)) ? MediaQuery.of(context).size.width * 0.95 : MediaQuery.of(context).size.height * 0.7,
-              height: (Responsive.isMobile(context)) ? MediaQuery.of(context).size.width * 0.95 : MediaQuery.of(context).size.height * 0.7,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.black, width: 2),
+      body: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
               ),
-              child: Column(
-                children: [
-                  Flexible(
-                    flex: 1,
-                    child: Row(
-                      children: [
-                        Flexible(
-                          flex: 1,
-                          child: buildSmallestColumn(0, 0),
-                        ),
-                        Flexible(
-                          flex: 1,
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                right: BorderSide(color: Colors.black, width: 2),
-                                left: BorderSide(color: Colors.black, width: 2),
-                              ),
-                            ),
-                            child: buildSmallestColumn(0, 3),
-                          ),
-                        ),
-                        Flexible(
-                          flex: 1,
-                          child: Container(
-                            child: buildSmallestColumn(0, 6),
-                          ),
-                        ),
-                      ],
-                    )
-                  ),
-                  Flexible(
-                    flex: 1,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          top: BorderSide(color: Colors.black, width: 2),
-                          bottom: BorderSide(color: Colors.black, width: 2),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Flexible(
-                            flex: 1,
-                            child: Container(
-                              child: buildSmallestColumn(3, 0),
-                            ),
-                          ),
-                          Flexible(
-                            flex: 1,
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                border: Border(
-                                  right: BorderSide(color: Colors.black, width: 2),
-                                  left: BorderSide(color: Colors.black, width: 2),
-                                ),
-                              ),
-                              child: buildSmallestColumn(3, 3),
-                            ),
-                          ),
-                          Flexible(
-                            flex: 1,
-                            child: Container(
-                              child: buildSmallestColumn(3, 6),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Flexible(
-                      flex: 1,
-                      child: Row(
-                        children: [
-                          Flexible(
-                            flex: 1,
-                            child: Container(
-                              child: buildSmallestColumn(6, 0),
-                            ),
-                          ),
-                          Flexible(
-                            flex: 1,
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                border: Border(
-                                  right: BorderSide(color: Colors.black, width: 2),
-                                  left: BorderSide(color: Colors.black, width: 2),
-                                ),
-                              ),
-                              child: buildSmallestColumn(6, 3),
-                            ),
-                          ),
-                          Flexible(
-                            flex: 1,
-                            child: Container(
-                              child: buildSmallestColumn(6, 6),
-                            ),
-                          ),
-                        ],
-                      )
-                  ),
-                ],
-              )
-            ),
-            const SizedBox(height: 20),
-            Row(
+              const SizedBox(width: 10),
+              Text('sudokuDLX', style: GoogleFonts.lato(fontSize: 24, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          Expanded(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('Reset ?', style: GoogleFonts.lato()),
-                          content: Text('Are you sure you want to reset the puzzle?', style: GoogleFonts.lato()),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Text('Cancel', style: GoogleFonts.lato(color: Colors.black)),
+                Container(
+                  width: (Responsive.isMobile(context)) ? MediaQuery.of(context).size.width * 0.95 : MediaQuery.of(context).size.height * 0.7,
+                  height: (Responsive.isMobile(context)) ? MediaQuery.of(context).size.width * 0.95 : MediaQuery.of(context).size.height * 0.7,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.black, width: 2),
+                  ),
+                  child: Column(
+                    children: [
+                      Flexible(
+                        flex: 1,
+                        child: Row(
+                          children: [
+                            Flexible(
+                              flex: 1,
+                              child: buildSmallestColumn(0, 0),
                             ),
-                            TextButton(
-                              onPressed: () {
-                                for (int i = 0; i < 9; i++) {
-                                  for (int j = 0; j < 9; j++) {
-                                    textControllers['$i$j']!.clear();
-                                    grid[i][j] = 0;
-                                  }
-                                }
-                                setState(() {
-                                  isEnabled = true;
-                                });
-                                Navigator.of(context).pop();
-                              },
-                              child: Text('OK', style: GoogleFonts.lato(color: Colors.red)),
+                            Flexible(
+                              flex: 1,
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(color: Colors.black, width: 2),
+                                    left: BorderSide(color: Colors.black, width: 2),
+                                  ),
+                                ),
+                                child: buildSmallestColumn(0, 3),
+                              ),
+                            ),
+                            Flexible(
+                              flex: 1,
+                              child: Container(
+                                child: buildSmallestColumn(0, 6),
+                              ),
                             ),
                           ],
+                        )
+                      ),
+                      Flexible(
+                        flex: 1,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            border: Border(
+                              top: BorderSide(color: Colors.black, width: 2),
+                              bottom: BorderSide(color: Colors.black, width: 2),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Flexible(
+                                flex: 1,
+                                child: Container(
+                                  child: buildSmallestColumn(3, 0),
+                                ),
+                              ),
+                              Flexible(
+                                flex: 1,
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                    border: Border(
+                                      right: BorderSide(color: Colors.black, width: 2),
+                                      left: BorderSide(color: Colors.black, width: 2),
+                                    ),
+                                  ),
+                                  child: buildSmallestColumn(3, 3),
+                                ),
+                              ),
+                              Flexible(
+                                flex: 1,
+                                child: Container(
+                                  child: buildSmallestColumn(3, 6),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Flexible(
+                          flex: 1,
+                          child: Row(
+                            children: [
+                              Flexible(
+                                flex: 1,
+                                child: Container(
+                                  child: buildSmallestColumn(6, 0),
+                                ),
+                              ),
+                              Flexible(
+                                flex: 1,
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                    border: Border(
+                                      right: BorderSide(color: Colors.black, width: 2),
+                                      left: BorderSide(color: Colors.black, width: 2),
+                                    ),
+                                  ),
+                                  child: buildSmallestColumn(6, 3),
+                                ),
+                              ),
+                              Flexible(
+                                flex: 1,
+                                child: Container(
+                                  child: buildSmallestColumn(6, 6),
+                                ),
+                              ),
+                            ],
+                          )
+                      ),
+                    ],
+                  )
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: Text('Reset ?', style: GoogleFonts.lato()),
+                              content: Text('Are you sure you want to reset the puzzle?', style: GoogleFonts.lato()),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('Cancel', style: GoogleFonts.lato(color: Colors.black)),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    for (int i = 0; i < 9; i++) {
+                                      for (int j = 0; j < 9; j++) {
+                                        textControllers['$i$j']!.clear();
+                                        grid[i][j] = 0;
+                                      }
+                                    }
+                                    setState(() {
+                                      isEnabled = true;
+                                      isSolved = false;
+                                    });
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('OK', style: GoogleFonts.lato(color: Colors.red)),
+                                ),
+                              ],
+                            );
+                          },
                         );
                       },
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    // minimumSize: const Size(200, 50),
-                    maximumSize: const Size(150, 50),
-                    side: const BorderSide(
-                        color: Colors.black,
-                        width: 2
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        // minimumSize: const Size(200, 50),
+                        maximumSize: const Size(150, 50),
+                        side: const BorderSide(
+                            color: Colors.black,
+                            width: 2
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.restart_alt),
+                          const SizedBox(width: 10),
+                          Text('Reset', style: GoogleFonts.lato(),),
+                        ],
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.restart_alt),
-                      const SizedBox(width: 10),
-                      Text('Reset', style: GoogleFonts.lato(),),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    for (int i = 0; i < 9; i++) {
-                      for (int j = 0; j < 9; j++) {
-                        grid[i][j] = (textControllers['$i$j']!.text) == '' ? 0 : int.parse(textControllers['$i$j']!.text);
-                      }
-                    }
-                    solveSudoku();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    // minimumSize: const Size(200, 50),
-                    maximumSize: const Size(150, 50),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.calculate),
-                      const SizedBox(width: 10),
-                      Text('Solve', style: GoogleFonts.lato(),),
-                    ],
-                  ),
+                    const SizedBox(width: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        for (int i = 0; i < 9; i++) {
+                          for (int j = 0; j < 9; j++) {
+                            if(textControllers['$i$j']!.text != '') {
+                              grid[i][j] = int.parse(textControllers['$i$j']!.text);
+                              inputCells.add('$i$j');
+                            }
+                          }
+                        }
+                        solveSudoku();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                        // minimumSize: const Size(200, 50),
+                        maximumSize: const Size(150, 50),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.calculate),
+                          const SizedBox(width: 10),
+                          Text('Solve', style: GoogleFonts.lato(),),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -418,13 +445,10 @@ class _SudokuState extends State<Sudoku> {
                                         decoration: const InputDecoration(
                                           border: InputBorder.none,
                                         ),
-                                        style: isEnabled ? GoogleFonts.lato(
+                                        style:  GoogleFonts.lato(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
-                                        ) : GoogleFonts.lato(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
+                                          color: (isSolved && inputCells.contains('$i$j')) ? Colors.blue.shade900 : Colors.black,
                                         ),
                                         onFieldSubmitted: (value) {
                                           grid[i][j] = int.parse(value);

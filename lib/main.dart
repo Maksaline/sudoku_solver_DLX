@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sudoku_solver/pages/landing_page.dart';
 import 'package:sudoku_solver/pages/sudoku.dart';
 
 void main() {
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
         useMaterial3: true,
       ),
-      home: const Sudoku(),
+      home: const LandingPage(),
     );
   }
 }
