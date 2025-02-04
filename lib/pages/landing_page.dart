@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sudoku_solver/pages/play_sudoku.dart';
 import 'package:sudoku_solver/pages/sudoku.dart';
 
+import 'about.dart';
+
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
 
@@ -84,7 +86,7 @@ class _LandingPageState extends State<LandingPage> {
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const About()));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,

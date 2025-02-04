@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   path_provider: ^2.1.5
   google_fonts: ^6.2.1
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
@@ -48,6 +49,14 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/images/sudokudlx.png"
+  windows:
+    generate: true
+    image_path: "assets/images/sudokudlx.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -64,6 +73,7 @@ flutter:
   assets:
     - assets/python/test.py
     - assets/images/sudokudlx.png
+    - assets/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

@@ -172,187 +172,193 @@ class _PlaySudokuState extends State<PlaySudoku> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-              ),
-              const SizedBox(width: 10),
-              Text('sudokuDLX', style: GoogleFonts.lato(fontSize: 24, fontWeight: FontWeight.bold)),
-            ],
-          ),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: (Responsive.isMobile(context)) ? MediaQuery.of(context).size.width * 0.95 : MediaQuery.of(context).size.height * 0.7,
-                  padding: const EdgeInsets.all(10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+                ),
+                Text('sudokuDLX', style: GoogleFonts.lato(fontSize: 24, fontWeight: FontWeight.bold)),
+                const SizedBox(width: 30),
+              ],
+            ),
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Mistakes: $mistakes/5', style: GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.bold)),
-                      Text('Time: ${time.inMinutes.remainder(60).toString().padLeft(2, '0')}:${time.inSeconds.remainder(60).toString().padLeft(2, '0')}', style: GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.bold)),
+                      Container(
+                        width: (Responsive.isMobile(context)) ? MediaQuery.of(context).size.width * 0.95 : MediaQuery.of(context).size.height * 0.7,
+                        padding: const EdgeInsets.all(10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Mistakes: $mistakes/5', style: GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.bold)),
+                            Text('Time: ${time.inMinutes.remainder(60).toString().padLeft(2, '0')}:${time.inSeconds.remainder(60).toString().padLeft(2, '0')}', style: GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10,),
+                      Container(
+                          width: (Responsive.isMobile(context)) ? MediaQuery.of(context).size.width * 0.95 : MediaQuery.of(context).size.height * 0.7,
+                          height: (Responsive.isMobile(context)) ? MediaQuery.of(context).size.width * 0.95 : MediaQuery.of(context).size.height * 0.7,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.black, width: 2),
+                          ),
+                          child: Column(
+                            children: [
+                              Flexible(
+                                  flex: 1,
+                                  child: Row(
+                                    children: [
+                                      Flexible(
+                                        flex: 1,
+                                        child: buildSmallestColumn(0, 0),
+                                      ),
+                                      Flexible(
+                                        flex: 1,
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                            border: Border(
+                                              right: BorderSide(color: Colors.black, width: 2),
+                                              left: BorderSide(color: Colors.black, width: 2),
+                                            ),
+                                          ),
+                                          child: buildSmallestColumn(0, 3),
+                                        ),
+                                      ),
+                                      Flexible(
+                                        flex: 1,
+                                        child: Container(
+                                          child: buildSmallestColumn(0, 6),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                              ),
+                              Flexible(
+                                flex: 1,
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                    border: Border(
+                                      top: BorderSide(color: Colors.black, width: 2),
+                                      bottom: BorderSide(color: Colors.black, width: 2),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Flexible(
+                                        flex: 1,
+                                        child: Container(
+                                          child: buildSmallestColumn(3, 0),
+                                        ),
+                                      ),
+                                      Flexible(
+                                        flex: 1,
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                            border: Border(
+                                              right: BorderSide(color: Colors.black, width: 2),
+                                              left: BorderSide(color: Colors.black, width: 2),
+                                            ),
+                                          ),
+                                          child: buildSmallestColumn(3, 3),
+                                        ),
+                                      ),
+                                      Flexible(
+                                        flex: 1,
+                                        child: Container(
+                                          child: buildSmallestColumn(3, 6),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Flexible(
+                                  flex: 1,
+                                  child: Row(
+                                    children: [
+                                      Flexible(
+                                        flex: 1,
+                                        child: Container(
+                                          child: buildSmallestColumn(6, 0),
+                                        ),
+                                      ),
+                                      Flexible(
+                                        flex: 1,
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                            border: Border(
+                                              right: BorderSide(color: Colors.black, width: 2),
+                                              left: BorderSide(color: Colors.black, width: 2),
+                                            ),
+                                          ),
+                                          child: buildSmallestColumn(6, 3),
+                                        ),
+                                      ),
+                                      Flexible(
+                                        flex: 1,
+                                        child: Container(
+                                          child: buildSmallestColumn(6, 6),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                              ),
+                            ],
+                          )
+                      ),
+                      const SizedBox(height: 10,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text('Reset?', style: GoogleFonts.lato(fontSize: 24, fontWeight: FontWeight.bold),),
+                                    content: Text('Do you want to reset the game?', style: GoogleFonts.lato()),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text('No'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          initSudoku();
+                                        },
+                                        child: const Text('Yes'),
+                                      )
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            icon: const Icon(Icons.refresh_rounded, color: Colors.black),
+                          )
+                        ],
+                      )
                     ],
                   ),
                 ),
-                const SizedBox(height: 10,),
-                Container(
-                    width: (Responsive.isMobile(context)) ? MediaQuery.of(context).size.width * 0.95 : MediaQuery.of(context).size.height * 0.7,
-                    height: (Responsive.isMobile(context)) ? MediaQuery.of(context).size.width * 0.95 : MediaQuery.of(context).size.height * 0.7,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.black, width: 2),
-                    ),
-                    child: Column(
-                      children: [
-                        Flexible(
-                            flex: 1,
-                            child: Row(
-                              children: [
-                                Flexible(
-                                  flex: 1,
-                                  child: buildSmallestColumn(0, 0),
-                                ),
-                                Flexible(
-                                  flex: 1,
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                      border: Border(
-                                        right: BorderSide(color: Colors.black, width: 2),
-                                        left: BorderSide(color: Colors.black, width: 2),
-                                      ),
-                                    ),
-                                    child: buildSmallestColumn(0, 3),
-                                  ),
-                                ),
-                                Flexible(
-                                  flex: 1,
-                                  child: Container(
-                                    child: buildSmallestColumn(0, 6),
-                                  ),
-                                ),
-                              ],
-                            )
-                        ),
-                        Flexible(
-                          flex: 1,
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                top: BorderSide(color: Colors.black, width: 2),
-                                bottom: BorderSide(color: Colors.black, width: 2),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Flexible(
-                                  flex: 1,
-                                  child: Container(
-                                    child: buildSmallestColumn(3, 0),
-                                  ),
-                                ),
-                                Flexible(
-                                  flex: 1,
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                      border: Border(
-                                        right: BorderSide(color: Colors.black, width: 2),
-                                        left: BorderSide(color: Colors.black, width: 2),
-                                      ),
-                                    ),
-                                    child: buildSmallestColumn(3, 3),
-                                  ),
-                                ),
-                                Flexible(
-                                  flex: 1,
-                                  child: Container(
-                                    child: buildSmallestColumn(3, 6),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Flexible(
-                            flex: 1,
-                            child: Row(
-                              children: [
-                                Flexible(
-                                  flex: 1,
-                                  child: Container(
-                                    child: buildSmallestColumn(6, 0),
-                                  ),
-                                ),
-                                Flexible(
-                                  flex: 1,
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                      border: Border(
-                                        right: BorderSide(color: Colors.black, width: 2),
-                                        left: BorderSide(color: Colors.black, width: 2),
-                                      ),
-                                    ),
-                                    child: buildSmallestColumn(6, 3),
-                                  ),
-                                ),
-                                Flexible(
-                                  flex: 1,
-                                  child: Container(
-                                    child: buildSmallestColumn(6, 6),
-                                  ),
-                                ),
-                              ],
-                            )
-                        ),
-                      ],
-                    )
-                ),
-                const SizedBox(height: 10,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: Text('Reset?', style: GoogleFonts.lato(fontSize: 24, fontWeight: FontWeight.bold),),
-                              content: Text('Do you want to reset the game?', style: GoogleFonts.lato()),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('No'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    initSudoku();
-                                  },
-                                  child: const Text('Yes'),
-                                )
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      icon: const Icon(Icons.refresh_rounded, color: Colors.black),
-                    )
-                  ],
-                )
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
