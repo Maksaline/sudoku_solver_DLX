@@ -1,16 +1,14 @@
-# sudoku_solver
+# AI Sudoku Solver
 
-A new Flutter project.
+AI based sudoku solver using Flutter and Python(only for windows).
 
-## Getting Started
+## Algorithm
 
-This project is a starting point for a Flutter application.
+Here Dancing Links algorithm is used to solve the sudoku. It is a backtracking algorithm that is particularly well suited to exact cover problems. It is both deterministic and efficient. The algorithm is a concise implementation of Knuth's Algorithm X.
 
-A few resources to get you started if this is your first Flutter project:
+- [Link to paper describing the algorithm](https://www.ocf.berkeley.edu/~jchu/publicportal/sudoku/0011047.pdf)
+- [Don Knuth's video lecture](https://www.youtube.com/watch?v=_cR9zDlvP88&ab_channel=StanfordOnline)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Capabilities
+* This app can solve any sudoku puzzle. Even the extreme ones from sudoku.com...
+* But it gives only one solution for a puzzle.
