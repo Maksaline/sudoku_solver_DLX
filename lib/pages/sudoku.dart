@@ -306,8 +306,8 @@ class _SudokuState extends State<Sudoku> {
                                           setState(() {
                                             isEnabled = true;
                                             isSolved = false;
+                                            inputCells.clear();
                                           });
-                                          inputCells.clear();
                                           Navigator.of(context).pop();
                                         },
                                         child: Text('OK', style: GoogleFonts.lato(color: Colors.red)),
